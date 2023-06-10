@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	go_gorm_cache "github.com/janartist/go-gorm-cache"
 	"github.com/janartist/go-gorm-cache/store"
 	"gorm.io/driver/sqlite"
@@ -37,11 +36,11 @@ type Product struct {
 }
 
 // 自定义配置
-func (p *Product) GetCacheConf() *go_gorm_cache.Conf {
-	return &go_gorm_cache.Conf{
-		IsCreateSet: true,
-		IsReadSet:   true,
-		Ttl:         time.Minute * 10,
+func (p *Product) GetCacheConf() go_gorm_cache.Conf {
+	return go_gorm_cache.Conf{
+		EnableWriteSet: true,
+		EnableReadSet:  true,
+		Ttl:            time.Minute * 10,
 	}
 }
 
@@ -74,46 +73,42 @@ func main() {
 		panic("failed to connect database")
 	}
 
-	opt, err := redis.ParseURL(fmt.Sprintf("redis://:%s@%s/%d", "", "10.1.2.7:6379", 3))
-	if err != nil {
-		panic(err)
-	}
-	rd := store.NewRedis(redis.NewClient(opt))
-
-	cache := go_gorm_cache.NewDBCache(rd, go_gorm_cache.DefaultConf)
-
-	err = db.Use(cache)
-
-	//err = db.Use(go_gorm_cache.NewDBCache(store.NewMemory(), &go_gorm_cache.Conf{}))
+	//opt, err := redis.ParseURL(fmt.Sprintf("redis://:%s@%s/%d", "", "10.1.2.7:6379", 3))
 	//if err != nil {
-	//	panic("db.Use connect database")
+	//	panic(err)
 	//}
-	db2 := db.Debug()
+	//rd := store.NewRedis(redis.NewClient(opt))
+	//
+	//cache := go_gorm_cache.NewDBCache(rd, go_gorm_cache.DefaultConf)
+	//err = db.Use(cache)
+
+	err = db.Use(go_gorm_cache.NewDBCache(store.NewMemory(), go_gorm_cache.Conf{}))
+	if err != nil {
+		panic("db.Use connect database")
+	}
+	db = db.Debug()
 
 	// 迁移 schema
 	db.AutoMigrate(&Product{})
 	// Create
-	if err = db2.Create(&Product{Code: "D42", Price: 100}).Error; err != nil {
-		panic("failed to connect database")
-	}
-
+	db.Create(&Product{Code: "Create", Price: 100})
 	// Read
 	var product Product
-	db2.First(&product, 1) // 根据整型主键查找
+	db.First(&product, 1) // 根据整型主键查找
+	fmt.Print(product, 9999, "\n")
+	return
+
 	//db.First(&product, "code = ?", "D42") // 查找 code 字段值为 D42 的记录
 
 	// Update - 将 product 的 price 更新为 200
-	db2.Model(&product).Update("Code", "S33")
+	db.Model(&product).Update("Code", "Update")
 	// Update - 更新多个字段
 	//db.Model(&product).Updates(Product{Price: 200, Code: "F42"}) // 仅更新非零值字段
 	//db.Model(&product).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
 
 	// Delete - 删除 product
-	// db2.Delete(&product, 1)
-	var p Product
-	err = cache.GetFromCache(db2, "products", 2, &p)
-
-	fmt.Print(p, err, "\n")
+	// db2.Delete(&product, 1)\
 }
+
 
 ```

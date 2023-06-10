@@ -38,17 +38,21 @@ func (m *memory) Get(ctx context.Context, key string, val interface{}) error {
 		m.Unlock()
 	}()
 	if i, ok := m.items[key]; ok {
+		if i.isExpired() {
+			delete(m.items, key)
+		}
 		if !i.isExpired() && reflect.ValueOf(val).Kind() == reflect.Ptr {
-			reflect.ValueOf(val).Elem().Set(reflect.ValueOf(i.value))
+			reflect.ValueOf(val).Elem().Set(reflect.Indirect(reflect.ValueOf(i.value)))
 			return nil
 		}
-		delete(m.items, key)
+		return errors.New("val is not Ptr")
+
 	}
 	return errors.New("val is nil")
 }
 
 func (m *memory) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
-	fmt.Print("set", key, "\n")
+	fmt.Print("set", key, val, "\n")
 	isForever := false
 	expireTime := time.Now().Add(ttl)
 	if ttl < 0 {
