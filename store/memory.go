@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"errors"
-	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -25,7 +24,6 @@ func NewMemory() *memory {
 }
 
 func (m *memory) Del(ctx context.Context, key string) error {
-	fmt.Print("del", key, "\n")
 	m.Lock()
 	delete(m.items, key)
 	m.Unlock()
@@ -52,7 +50,6 @@ func (m *memory) Get(ctx context.Context, key string, val interface{}) error {
 }
 
 func (m *memory) Set(ctx context.Context, key string, val interface{}, ttl time.Duration) error {
-	fmt.Print("set", key, val, "\n")
 	isForever := false
 	expireTime := time.Now().Add(ttl)
 	if ttl < 0 {

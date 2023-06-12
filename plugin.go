@@ -15,7 +15,7 @@ import (
 
 const (
 	pluginName     = "cache"
-	primaryValJoin = "_"
+	primaryValJoin = ":"
 	confDBKey      = "cache_conf"
 )
 
@@ -58,10 +58,6 @@ type ConfigInterface interface {
 	GetCacheConf() Conf
 }
 
-type KeyInterface interface {
-	GetCacheKey() string
-}
-
 type EnableInterface interface {
 	IsCacheEnable() bool
 }
@@ -94,17 +90,10 @@ func (d *DB) Initialize(db *gorm.DB) error {
 	return nil
 }
 
-//func (d *DB) Get(db *gorm.DB, dest interface{}, ids ...interface{}) {
-//
-//	for i, id := range ids {
-//		key, err := d.getCacheKeyFromPrimaryID(db, toStr(id))
-//		if err != nil {
-//			log.Print("Get getCacheKeyFromPrimaryID error:", err)
-//			return
-//		}
-//		err := d.Store.Get(db.Statement.Context, key, dest)
-//	}
-//}
+func (d *DB) Get(ctx context.Context, tableName string, id interface{}, dest interface{}) error {
+	key := d.Conf.Prefix + primaryValJoin + tableName + primaryValJoin + toStr(id)
+	return d.Store.Get(ctx, key, dest)
+}
 
 func (d *DB) Before() func(*gorm.DB) {
 	return func(db *gorm.DB) {
