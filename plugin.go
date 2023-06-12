@@ -22,7 +22,7 @@ const (
 var (
 	DefaultConf = &Conf{
 		Prefix:         "gorm_cache",
-		EnableReadSet:  false,
+		EnableFindSet:  false,
 		EnableWriteSet: false,
 		Ttl:            0,
 	}
@@ -36,7 +36,7 @@ var (
 type Conf struct {
 	Prefix string `json:"prefix" yaml:"prefix"`
 	// 开启读库写缓存
-	EnableReadSet bool `json:"enable_find_set" yaml:"enable_find_set"`
+	EnableFindSet bool `json:"enable_find_set" yaml:"enable_find_set"`
 	// 开启写库写缓存, false为删缓存
 	EnableWriteSet bool `json:"enable_create_set" yaml:"enable_create_set"`
 	// 默认过期时间
@@ -107,7 +107,7 @@ func (d *DB) Query() func(*gorm.DB) {
 			callbacks.Query(db)
 			return
 		}
-		if conf := d.getConfig(db); !conf.EnableReadSet {
+		if conf := d.getConfig(db); !conf.EnableFindSet {
 			callbacks.Query(db)
 			return
 		}

@@ -22,7 +22,7 @@ type Product struct {
 func (p *Product) GetCacheConf() go_gorm_cache.Conf {
 	return go_gorm_cache.Conf{
 		EnableWriteSet: true,
-		EnableReadSet:  true,
+		EnableFindSet:  true,
 		Ttl:            time.Minute * 10,
 	}
 }
