@@ -1,4 +1,4 @@
-~~## gorm cache plugin
+## gorm cache plugin
 
 ### 用于gorm的缓存插件
 
