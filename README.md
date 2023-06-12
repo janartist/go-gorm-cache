@@ -3,7 +3,9 @@
 ### 用于gorm的缓存插件
 
 - 0侵入业务代码
-- 通过gorm callback实现cache delete以及cache write set
+- 通过gorm callback实现 gorm:update及gorm:delete 后 cache del以及cache set
+- 通过gorm callback实现 gorm:query 前 cache get
+- 实现gorm:query时防缓存击穿
 - 每个模型可以单独配置
 - 默认主键实现key
 - 实现内存以及redis驱动
