@@ -19,7 +19,7 @@ type Product struct {
 }
 
 // 自定义配置
-func (p *Product) GetCacheConf() go_gorm_cache.Conf {
+func (p Product) GetCacheConf() go_gorm_cache.Conf {
 	return go_gorm_cache.Conf{
 		EnableWriteSet: true,
 		EnableFindSet:  true,
@@ -69,12 +69,11 @@ func main() {
 	// 迁移 schema
 	db.AutoMigrate(&Product{})
 	// Create
-	db.Create(&Product{Code: "Create", Price: 100})
+	db.Model(Product{}).Create(&Product{Code: "Create", Price: 100})
 	// Read
 	var product Product
-	db.First(&product, 1) // 根据整型主键查找
+	db.Model(Product{}).First(&product, 1) // 根据整型主键查找
 	fmt.Print("Hit cache Skip Db:", product, "\n")
-
 	//db.First(&product, "code = ?", "D42") // 查找 code 字段值为 D42 的记录
 
 	// Update - 将 product 的 price 更新为 200

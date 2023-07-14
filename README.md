@@ -40,7 +40,7 @@ type Product struct {
 }
 
 // 自定义配置
-func (p *Product) GetCacheConf() go_gorm_cache.Conf {
+func (p Product) GetCacheConf() go_gorm_cache.Conf {
 	return go_gorm_cache.Conf{
 		EnableWriteSet: true,
 		EnableReadSet:  true,
@@ -49,16 +49,16 @@ func (p *Product) GetCacheConf() go_gorm_cache.Conf {
 }
 
 // 启用(优先级比禁用高)
-func (p *Product) IsCacheEnable() bool {
+func (p Product) IsCacheEnable() bool {
 	return true
 }
 
 // 禁用
-func (p *Product) IsCacheDisable() bool {
+func (p Product) IsCacheDisable() bool {
 	return false
 }
 
-func (p *Product) MarshalBinary() (data []byte, err error) {
+func (p Product) MarshalBinary() (data []byte, err error) {
 	return json.Marshal(p)
 }
 
@@ -111,5 +111,27 @@ func main() {
 	db.Delete(&product, 1)
 }
 
-
 ```
+
+### Tips
+
+- 配置设置请勿使用指针方法，以免模型断言成接口会失败,因为gorm中的模型可以为指针或结构体
+```go
+func (p Product) GetCacheConf() go_gorm_cache.Conf {
+	return go_gorm_cache.Conf{
+		EnableWriteSet: true,
+		EnableReadSet:  true,
+		Ttl:            time.Minute * 10,
+	}
+}
+// 启用(优先级比禁用高)
+func (p Product) IsCacheEnable() bool {
+    return true
+}
+
+// 禁用
+func (p Product) IsCacheDisable() bool {
+    return false
+}
+```
+- 增删查改需要统一使用一个模型（结构体），勿切换其他以免出现主键未找到等情况。且主键需用 ```gorm:"primarykey"```标签标明
