@@ -265,9 +265,11 @@ func (d *DB) getConfig(db *gorm.DB) Conf {
 
 func (d *DB) getPrimaryVal(db *gorm.DB) string {
 	var primaryVal string
-	for _, field := range db.Statement.Schema.PrimaryFields {
-		if fieldValue, isZero := field.ValueOf(db.Statement.Context, db.Statement.ReflectValue); !isZero {
-			primaryVal += primaryValJoin + toStr(fieldValue)
+	if db.Statement.ReflectValue.Type().String() == db.Statement.Schema.ModelType.String() {
+		for _, field := range db.Statement.Schema.PrimaryFields {
+			if fieldValue, isZero := field.ValueOf(db.Statement.Context, db.Statement.ReflectValue); !isZero {
+				primaryVal += primaryValJoin + toStr(fieldValue)
+			}
 		}
 	}
 	return strings.TrimPrefix(primaryVal, primaryValJoin)
